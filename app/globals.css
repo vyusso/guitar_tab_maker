@@ -1,26 +1,984 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Terminal theme (aligned with example.css) + tab maker layout */
+
+body.terminal-body,
+body.terminal-body * {
+  font-family: var(--font-vt323), "Courier New", Courier, monospace !important;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* {
+  cursor: url("/cursors/cursor.svg") 2 2, auto !important;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+button,
+.clickable,
+.clickable * {
+  cursor: url("/cursors/pointer.svg") 2 2, pointer !important;
+}
+
+input[type="text"],
+textarea {
+  cursor: url("/cursors/text-cursor.svg") 1 10, text !important;
+}
+
+html {
+  height: 100%;
+  max-height: 100dvh;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body.terminal-body {
+  margin: 0;
+  height: 100%;
+  max-height: 100dvh;
+  overflow: hidden;
+  background-color: #000000;
+  color: #eeeeee;
+  font-size: clamp(1.37rem, 1.66vw, 1.66rem);
+  line-height: 1.4;
+  letter-spacing: 0.05em;
+}
+
+.terminal-root {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  padding: 0.9rem;
+  box-sizing: border-box;
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+}
+
+.terminal-root.tab-maker-page {
+  align-items: stretch;
+  justify-content: flex-start;
+  padding: 0;
+  height: 100%;
+  max-height: 100dvh;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.terminal-frame {
+  flex: 0 0 auto;
+  width: 100%;
+  max-width: 56rem;
+  margin: 0 auto;
+  border: 1px solid #ff6b35;
+  box-shadow: 0 0 20px rgba(255, 107, 53, 0.6);
+  display: flex;
+  flex-direction: column;
+  background: #000000;
+  overflow: hidden;
+}
+
+.terminal-frame.tab-maker-frame {
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  flex: 1 1 0%;
+  min-height: 0;
+  max-height: 100%;
+  box-shadow: inset 0 0 24px rgba(255, 107, 53, 0.15);
+}
+
+.terminal-frame.expanded.tab-maker-frame {
+  flex: 1 1 0%;
+  min-height: 0;
+  max-height: 100%;
+}
+
+.terminal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.35rem 0.6rem;
+  border-bottom: 1px solid #ff6b35;
+  background-color: #000000;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: clamp(1.22rem, 1.51vw, 1.58rem);
+  flex-shrink: 0;
+}
+
+.terminal-header-left,
+.terminal-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.terminal-status-dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 999px;
+  background-color: #ff6b35;
+  box-shadow: 0 0 10px rgba(255, 107, 53, 0.9);
+}
+
+.terminal-header-label {
+  opacity: 0.9;
+}
+
+.terminal-status-text {
+  color: #000000;
+  background-color: #ff6b35;
+  padding: 0.1rem 0.4rem;
+  border-radius: 2px;
+}
+
+.terminal-content {
+  flex: 1 1 0%;
+  padding: 0.35rem 0.45rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Neck uses leftover height; tab block is capped so the frame stays within the viewport. */
+.tab-maker-content {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 0.45rem;
+  overflow: hidden;
+  flex: 1 1 0%;
+  min-height: 0;
+  padding: 0.4rem 0.45rem 0.35rem;
+}
+
+.terminal-footer {
+  margin-top: 0;
+  flex-shrink: 0;
+  font-size: clamp(1.08rem, 1.22vw, 1.3rem);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-align: center;
+  color: #ff6b35;
+  opacity: 0.8;
+  padding: 0.3rem 0.5rem 0.4rem;
+}
+
+.panel {
+  border: 1px solid #ff6b35;
+  background-color: rgba(0, 0, 0, 0.9);
+  padding: 0.45rem 0.55rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.tab-fretboard-panel {
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.tab-staff-panel {
+  min-height: 0;
+  max-height: min(42dvh, 21.5rem);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Slightly tighter tab block (staff + controls) without shrinking the neck. */
+.tab-staff-panel.panel {
+  padding: 0.38rem 0.48rem;
+  gap: 0.22rem;
+}
+
+.tab-staff-panel .panel-title {
+  font-size: clamp(1.08rem, 1.32vw, 1.38rem);
+  letter-spacing: 0.1em;
+}
+
+.tab-staff-panel .tab-staff-shell {
+  padding: 0.34rem 0.44rem;
+}
+
+.tab-staff-panel .tab-staff-pre {
+  font-size: clamp(0.92rem, 1.08vw, 1.12rem);
+  line-height: 1.28;
+  letter-spacing: 0.03em;
+}
+
+.tab-staff-panel .tab-controls {
+  gap: 0.32rem;
+  margin-top: 0.18rem;
+  padding-bottom: 0.06rem;
+}
+
+.tab-staff-panel .search-button {
+  padding: 0.2rem 0.55rem;
+  font-size: clamp(0.98rem, 1.16vw, 1.2rem);
+  letter-spacing: 0.13em;
+}
+
+.tab-staff-panel .tab-control-secondary,
+.tab-staff-panel .tab-control-danger {
+  padding: 0.2rem 0.48rem;
+  font-size: clamp(0.94rem, 1.12vw, 1.15rem);
+  letter-spacing: 0.1em;
+}
+
+.panel-title {
+  margin: 0;
+  font-size: clamp(1.22rem, 1.51vw, 1.58rem);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  flex-shrink: 0;
+}
+
+.tab-panel-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.tab-panel-title-row .panel-title {
+  line-height: 1.1;
+}
+
+.tab-neck-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.tab-tuning-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ff6b35;
+  background-color: #000000;
+  color: #ff6b35;
+  padding: 0.2rem 0.5rem;
+  line-height: 0;
+  font: inherit;
+  font-size: clamp(0.88rem, 1.05vw, 1rem);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-shadow: 0 0 10px rgba(255, 107, 53, 0.35);
+}
+
+.tab-tuning-btn:hover {
+  background-color: rgba(255, 107, 53, 0.12);
+}
+
+.tab-neck-help-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ff6b35;
+  background-color: #000000;
+  color: #ff6b35;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  line-height: 0;
+  font: inherit;
+  font-size: clamp(1.35rem, 1.6vw, 1.65rem);
+  flex-shrink: 0;
+  box-shadow: 0 0 10px rgba(255, 107, 53, 0.35);
+}
+
+.tab-neck-help-btn:hover {
+  background-color: rgba(255, 107, 53, 0.12);
+}
+
+.tab-help-dialog {
+  margin: auto;
+  padding: 0;
+  border: 1px solid #ff6b35;
+  background-color: #000000;
+  color: #eeeeee;
+  max-width: min(92vw, 24rem);
+  box-shadow: 0 0 28px rgba(255, 107, 53, 0.55);
+}
+
+.tab-help-dialog::backdrop {
+  background-color: rgba(0, 0, 0, 0.72);
+}
+
+.tab-help-dialog-inner {
+  padding: 0.55rem 0.65rem 0.65rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.tab-help-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  border-bottom: 1px solid rgba(255, 107, 53, 0.45);
+  padding-bottom: 0.35rem;
+}
+
+.tab-help-dialog-title {
+  margin: 0;
+  font-size: clamp(1.22rem, 1.51vw, 1.58rem);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #ff6b35;
+}
+
+.tab-help-dialog-close {
+  border: 1px solid rgba(255, 107, 53, 0.55);
+  background: transparent;
+  color: #ff6b35;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  line-height: 1;
+  font: inherit;
+  font-size: 1.5rem;
+}
+
+.tab-help-dialog-close:hover {
+  background-color: rgba(255, 107, 53, 0.15);
+}
+
+.tab-help-dialog-done {
+  align-self: flex-end;
+  margin-top: 0.15rem;
+}
+
+.tab-save-tab-dialog {
+  max-width: min(92vw, 26rem);
+}
+
+.tab-save-tab-dialog-inner {
+  gap: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+.tab-save-tab-dialog-lead {
+  margin: 0;
+  padding: 0.15rem 0 0;
+  font-size: clamp(0.92rem, 1.05vw, 1.02rem);
+  letter-spacing: 0.035em;
+  line-height: 1.5;
+  color: rgba(238, 238, 238, 0.92);
+}
+
+.tab-save-tab-dialog-lead-continued {
+  display: inline-block;
+  margin-top: 0.4em;
+  line-height: 1.45;
+}
+
+.tab-save-tab-dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0;
+}
+
+.tab-save-tab-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tab-save-tab-filename-label {
+  font-size: clamp(0.82rem, 0.95vw, 0.9rem);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #ff6b35;
+  line-height: 1.35;
+}
+
+.tab-save-tab-filename-editable {
+  letter-spacing: 0.06em;
+  text-transform: none;
+  font-size: clamp(0.88rem, 1vw, 0.95rem);
+  color: rgba(255, 203, 164, 0.95);
+}
+
+.tab-save-tab-filename-input {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 2.5rem;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid rgba(255, 107, 53, 0.75);
+  border-radius: 2px;
+  background-color: #0a0a12;
+  color: #eeeeee;
+  font: inherit;
+  font-size: clamp(1.02rem, 1.18vw, 1.14rem);
+  letter-spacing: 0.04em;
+  line-height: 1.3;
+}
+
+.tab-save-tab-filename-input:focus {
+  outline: none;
+  border-color: #ff6b35;
+  box-shadow: 0 0 0 1px rgba(255, 107, 53, 0.45), 0 0 14px rgba(255, 107, 53, 0.2);
+}
+
+.tab-save-tab-filename-hint {
+  margin: 0;
+  padding-top: 0.05rem;
+  font-size: clamp(0.84rem, 0.96vw, 0.92rem);
+  letter-spacing: 0.03em;
+  line-height: 1.45;
+  color: rgba(238, 238, 238, 0.62);
+}
+
+.tab-save-tab-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 107, 53, 0.28);
+}
+
+.tab-help-dialog-wide {
+  max-width: min(92vw, 28rem);
+}
+
+.tab-help-dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  max-height: min(65dvh, 22rem);
+  overflow-y: auto;
+  padding: 0.15rem 0.2rem 0.05rem 0;
+}
+
+.tab-help-dialog-section {
+  margin: 0;
+  padding: 0.55rem 0 0;
+  border-top: 1px solid rgba(255, 107, 53, 0.3);
+}
+
+.tab-help-dialog-section:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.tab-help-dialog-section-title {
+  margin: 0 0 0.4rem;
+  font-size: clamp(0.98rem, 1.12vw, 1.1rem);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: #ff6b35;
+  font-weight: normal;
+  opacity: 0.95;
+}
+
+.tab-help-dialog-steps {
+  margin: 0;
+  padding: 0 0 0 1.55rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  font-size: clamp(1.02rem, 1.2vw, 1.22rem);
+  letter-spacing: 0.04em;
+  line-height: 1.42;
+  list-style-type: decimal;
+  list-style-position: outside;
+}
+
+.tab-help-dialog-step {
+  padding-left: 0.4rem;
+}
+
+.tab-help-dialog-step::marker {
+  color: #ff6b35;
+  font-variant-numeric: tabular-nums;
+}
+
+.tab-tuning-dialog-note {
+  margin: 0;
+  font-size: clamp(0.98rem, 1.15vw, 1.12rem);
+  opacity: 0.72;
+  letter-spacing: 0.04em;
+  line-height: 1.3;
+}
+
+.tab-tuning-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  max-height: min(32dvh, 11rem);
+  overflow-y: auto;
+}
+
+.tab-tuning-list-item {
+  margin: 0;
+}
+
+.tab-tuning-option-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0.25rem;
+}
+
+.tab-tuning-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.12rem;
+  text-align: left;
+  border: 1px solid rgba(255, 107, 53, 0.35);
+  background-color: #05050a;
+  color: #eeeeee;
+  padding: 0.35rem 0.45rem;
+  font: inherit;
+  letter-spacing: 0.04em;
+}
+
+.tab-tuning-option-grow {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
+}
+
+.tab-tuning-delete {
+  flex: 0 0 2.25rem;
+  border: 1px solid rgba(255, 107, 53, 0.45);
+  background-color: #05050a;
+  color: #ff6b35;
+  font: inherit;
+  font-size: 1.4rem;
+  line-height: 1;
+  padding: 0;
+}
+
+.tab-tuning-delete:hover {
+  background-color: rgba(255, 107, 53, 0.12);
+  border-color: #ff6b35;
+}
+
+.tab-tuning-option:hover {
+  border-color: rgba(255, 107, 53, 0.65);
+  background-color: rgba(255, 107, 53, 0.08);
+}
+
+.tab-tuning-option-active {
+  border-color: #ff6b35;
+  background-color: rgba(255, 107, 53, 0.14);
+  box-shadow: 0 0 12px rgba(255, 107, 53, 0.25);
+}
+
+.tab-tuning-option-name {
+  font-size: clamp(1.05rem, 1.25vw, 1.22rem);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #ff6b35;
+}
+
+.tab-tuning-option-labels {
+  font-size: clamp(0.98rem, 1.12vw, 1.08rem);
+  opacity: 0.88;
+  font-variant-numeric: tabular-nums;
+}
+
+.tab-tuning-dialog {
+  max-width: min(92vw, 26rem);
+}
+
+.tab-tuning-section-label {
+  margin: 0.45rem 0 0.15rem;
+  font-size: clamp(1rem, 1.15vw, 1.12rem);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: #ff6b35;
+  opacity: 0.9;
+  font-weight: normal;
+}
+
+.tab-tuning-empty-custom {
+  margin: 0 0 0.35rem;
+  opacity: 0.55;
+  font-size: clamp(1rem, 1.15vw, 1.12rem);
+}
+
+.tab-tuning-add-custom {
+  width: 100%;
+  margin-top: 0.25rem;
+}
+
+.tab-custom-tuning-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.tab-custom-tuning-intro {
+  margin: 0;
+  font-size: clamp(0.98rem, 1.12vw, 1.1rem);
+  opacity: 0.72;
+  letter-spacing: 0.04em;
+  line-height: 1.35;
+}
+
+.tab-custom-tuning-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.tab-custom-tuning-label {
+  font-size: clamp(0.95rem, 1.08vw, 1.05rem);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #ff6b35;
+  opacity: 0.88;
+}
+
+.tab-custom-tuning-input {
+  width: 100%;
+}
+
+.tab-custom-tuning-strings {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.tab-custom-tuning-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.15rem;
+}
+
+.mainimage-container {
+  position: relative;
+  border: 1px solid #ff6b35;
+  background-color: #05050a;
+  overflow: auto;
+  flex: 1;
+  min-height: 0;
+  display: block;
+}
+
+/* Scrolls when the neck is wider than the panel; inner wrap is vertically centered. */
+.tab-fretboard-viewport {
+  padding: clamp(0.18rem, 1.35dvh, 0.48rem);
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 0;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Invisible full-height slot: centers the neck block vertically inside the bordered viewport. */
+.tab-fretboard-center-wrap {
+  flex: 1 1 0%;
+  min-height: 0;
+  width: 100%;
+  min-width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+  box-sizing: border-box;
+}
+
+.tab-fretboard-shell {
+  width: 100%;
+  /* At least ~25 wide frets + labels; scroll below this so cells never shrink below minmax in --tab-fret-grid */
+  min-width: max(100%, 66rem);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.05rem, 0.5dvh, 0.26rem);
+  box-sizing: border-box;
+}
+
+.tab-fretboard-header,
+.tab-fret-row {
+  display: grid;
+  grid-template-columns: var(
+    --tab-fret-grid,
+    1.95rem 2.1rem repeat(13, minmax(2.2rem, 1fr))
+  );
+  align-items: stretch;
+  gap: clamp(0.07rem, 0.45dvh, 0.19rem);
+  min-width: 0;
+}
+
+.tab-fret-row-focused {
+  box-shadow: inset 3px 0 0 #ff6b35;
+}
+
+.tab-fret-row-focused .tab-string-name {
+  text-shadow: 0 0 8px rgba(255, 107, 53, 0.55);
+}
+
+.tab-fret-label-spacer,
+.tab-fret-col-label {
+  text-align: center;
+  font-size: clamp(0.72rem, 0.82dvh + 0.58rem, 1.18rem);
+  color: #ff6b35;
+  opacity: 0.85;
+  padding: clamp(0, 0.35dvh, 0.1rem) 0;
+}
+
+.tab-string-name {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ff6b35;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: clamp(0.75rem, 1dvh + 0.48rem, 1.32rem);
+}
+
+.tab-mute-btn {
+  border: 1px solid rgba(255, 107, 53, 0.45);
+  background: #000000;
+  color: #eeeeee;
+  font: inherit;
+  padding: clamp(0.05rem, 0.82dvh, 0.18rem);
+  line-height: 1;
+  font-size: clamp(0.75rem, 0.92dvh + 0.48rem, 1.02rem);
+}
+
+.tab-mute-btn:hover {
+  border-color: #ff6b35;
+}
+
+.tab-mute-active {
+  background-color: #ff6b35;
+  color: #000000;
+  border-color: #ff6b35;
+  box-shadow: 0 0 12px rgba(255, 107, 53, 0.55);
+}
+
+.tab-fret-cell {
+  border: 1px solid rgba(255, 107, 53, 0.22);
+  background-color: #05050a;
+  background-image: linear-gradient(
+      to right,
+      rgba(255, 107, 53, 0.12) 1px,
+      transparent 1px
+    ),
+    linear-gradient(to top, rgba(255, 107, 53, 0.1) 1px, transparent 1px);
+  background-size: 6px 100%, 100% 6px;
+  color: #eeeeee;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  padding: clamp(0.06rem, 1dvh, 0.32rem) 0.07rem;
+  min-height: clamp(1.18rem, 5dvh + 0.15rem, 3.05rem);
+  font-size: clamp(0.75rem, 1dvh + 0.45rem, 1.08rem);
+}
+
+.tab-fret-cell:hover {
+  border-color: rgba(255, 107, 53, 0.55);
+}
+
+.tab-fret-cell-active {
+  border-color: #ff6b35;
+  color: #000000;
+  background-color: #ff6b35;
+  box-shadow: 0 0 14px rgba(255, 107, 53, 0.65);
+}
+
+.tab-staff-shell {
+  border: 1px solid rgba(255, 107, 53, 0.35);
+  background-color: #05050a;
+  padding: 0.45rem 0.55rem;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  overflow-x: auto;
+}
+
+.tab-staff-pre {
+  margin: 0;
+  font: inherit;
+  white-space: pre;
+  letter-spacing: 0.04em;
+  line-height: 1.35;
+  color: #eeeeee;
+}
+
+.tab-technique-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.55rem;
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+}
+
+.tab-technique-strip-label {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.12rem 0.2rem;
+  font-size: clamp(0.86rem, 1vw, 0.96rem);
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: rgba(238, 238, 238, 0.9);
+  opacity: 0.95;
+}
+
+.tab-technique-strip-word {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: clamp(0.82rem, 0.96vw, 0.92rem);
+  color: #ff6b35;
+}
+
+.tab-technique-strip-string {
+  color: #eeeeee;
+  opacity: 1;
+  letter-spacing: 0.04em;
+}
+
+.tab-technique-strip-sep {
+  color: rgba(255, 107, 53, 0.55);
+  letter-spacing: 0.06em;
+}
+
+.tab-technique-strip-note {
+  padding: 0.08rem 0.42rem;
+  font-size: clamp(0.9rem, 1.04vw, 1.02rem);
+  letter-spacing: 0.05em;
+  font-variant-numeric: tabular-nums;
+  color: #ffcba4;
+  border: 1px solid rgba(255, 107, 53, 0.55);
+  background-color: #05050a;
+}
+
+.tab-technique-strip-ping {
+  font-size: clamp(0.78rem, 0.9vw, 0.88rem);
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: #ff8a5a;
+}
+
+.tab-technique-strip-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.28rem;
+}
+
+.tab-technique-btn {
+  min-width: 1.9rem;
+  padding: 0.14rem 0.38rem;
+  border: 1px solid rgba(255, 107, 53, 0.55);
+  background-color: #000000;
+  color: #eeeeee;
+  font: inherit;
+  font-size: clamp(0.94rem, 1.08vw, 1.06rem);
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+}
+
+.tab-technique-btn:hover {
+  border-color: #ff6b35;
+  box-shadow: 0 0 10px rgba(255, 107, 53, 0.35);
+}
+
+.tab-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.25rem;
+  padding-bottom: 0.1rem;
+  flex-shrink: 0;
+}
+
+.search-button {
+  border: 1px solid #ff6b35;
+  background-color: #ff6b35;
+  color: #000000;
+  padding: 0.25rem 0.65rem;
+  font-size: clamp(1.08rem, 1.3vw, 1.35rem);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+.search-button:hover:not(:disabled) {
+  background-color: #ff8a5a;
+}
+
+.tab-control-secondary {
+  border: 1px solid #ff6b35;
+  background-color: #000000;
+  color: #eeeeee;
+  padding: 0.25rem 0.55rem;
+  font-size: clamp(1.02rem, 1.22vw, 1.28rem);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.tab-control-secondary:hover:not(:disabled) {
+  box-shadow: 0 0 12px rgba(255, 107, 53, 0.35);
+}
+
+/* Same footprint as other tab-control-secondary buttons; only colors match Add chord. */
+.tab-riff-toggle.tab-riff-toggle-lit {
+  background-color: #ff6b35;
+  color: #000000;
+}
+
+.tab-riff-toggle.tab-riff-toggle-lit:hover:not(:disabled) {
+  background-color: #ff8a5a;
+  box-shadow: none;
+}
+
+.tab-control-danger {
+  border: 1px solid #ff6b35;
+  background-color: transparent;
+  color: #ff6b35;
+  padding: 0.25rem 0.55rem;
+  font-size: clamp(1.02rem, 1.22vw, 1.28rem);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.tab-control-danger:hover:not(:disabled) {
+  background-color: rgba(255, 107, 53, 0.12);
+}
+
+button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed !important;
+}
+
+@media (max-width: 720px) {
+  .tab-fretboard-shell {
+    min-width: max(100%, 66rem);
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }
